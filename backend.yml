@@ -39,8 +39,8 @@
         path: /app
         state: present
     - name: Copy and configure application environment file
-      ansible.builtin.template:
-        src: backend-service.j2
+      template:
+        src: nodejs.conf.j2
         dest: /etc/systemd/system/backend.service
     - name: Reload systemd configuration cache to register new backend service
       ansible.builtin.systemd:
