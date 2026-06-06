@@ -1,6 +1,6 @@
 - name: launching expense project infra
   hosts: localhost
-  connection: localhost
+  connection: local
   vars:
     instances: ["database", "backend", "frontend", "lb"]
     domain: "yokshithkumar.shop"
