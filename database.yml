@@ -1,16 +1,19 @@
 - name: configuring database servers
   hosts: database
+  become: yes
   tasks:
     - name: installing mysql package
       package:
         name: mysql-server
         state: present
-    - name: enable and start the mysql
-      service:
+    - name: enable and start the mysql server
+      ansible.builtin.service:
         name: mysqld
         state: started
-        enabled: yes
-        - name: install python3-pymysql driver
+        enabled: true
+
+    
+    - name: install python3-pymysql driver
       package:
         name: python3-pymysql
         state: present
@@ -24,7 +27,7 @@
       ansible.mysql.mysql_user:
         # What you want to set
         name: root
-        password: "{{ mysql_root_password }}"
+        password: "{{ mysql_password }}"
         host: "{{ item }}"
         # How to authenticate right now
         login_user: root
@@ -35,5 +38,6 @@
         - 127.0.0.1
         - ::1
       ignore_errors: yes # Essential so subsequent runs do not fail once password
+      
     
          
