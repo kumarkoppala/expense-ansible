@@ -13,31 +13,12 @@
         enabled: true
 
     
-    - name: install python3-pymysql driver
-      package:
-        name: python3-pymysql
-        state: present
-
-    - name: Extract temporary MySQL password
-      ansible.builtin.shell: grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}'
-      register: temp_password_output
-      changed_when: false
-
-    - name: Update MySQL root password
-      ansible.mysql.mysql_user:
-        # What you want to set
-        name: root
-        password: "{{ mysql_password }}"
-        host: "{{ item }}"
-        # How to authenticate right now
-        login_user: root
-        login_password: "{{ temp_password_output.stdout }}"
-        state: present
-      loop:
-        - localhost
-        - 127.0.0.1
-        - ::1
-      ignore_errors: yes # Essential so subsequent runs do not fail once password
-      
-    
+    - name: setup root user_password
+      ansible.builtin.shell: |
+        mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'ExpenseApp@1';"
+      register: result
+      failed_when: 
+        - result.rc != 0 
+        - "'ERROR 1045' not in result.stderr" # Don't fail if the password was already changed
+      changed_when: result.rc == 0
          
