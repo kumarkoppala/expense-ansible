@@ -49,6 +49,12 @@
       package:
         name: mysql
         state: present
+    - name: install python3-pymysql driver on backend host
+      ansible.builtin.package:
+        name: python3-pymysql
+        state: present
+
+    
     - name: Check if a specific table already exists in the database
       community.mysql.mysql_query:
         login_host: "database.yokshithkumar.shop"
