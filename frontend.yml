@@ -24,8 +24,17 @@
     ansible.builtin.package:
       name:
         - tar
-        - python3-pymysql # FIX 2: Required for mysql modules to work
       state: present
+  - name: Ensure python3-pip is available on frontend host
+    ansible.builtin.package:
+      name: python3-pip
+      state: present
+
+  - name: Install PyMySQL driver using pip3 instead of dnf
+    ansible.builtin.pip:
+      name: pymysql
+      state: present
+
   - name: download frontend
     get_url:
       url: https://raw.githubusercontent.com/daws-90s/expense-documentation/refs/heads/main/artifacts/expense-frontend-v3.tar.gz
