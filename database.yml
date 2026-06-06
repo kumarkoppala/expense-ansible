@@ -15,7 +15,7 @@
     
     - name: setup root user_password
       ansible.builtin.shell: |
-        mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'ExpenseApp@1';"
+        mysql_secure_installation --set-root-pass ExpenseApp@1
       register: result
       failed_when: 
         - result.rc != 0 
