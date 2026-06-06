@@ -40,8 +40,11 @@
         state: present
     - name: Copy and configure application environment file
       ansible.builtin.template:
-        src: backend.service.j2
+        src: backend-service.j2
         dest: /etc/systemd/system/backend.service
+    - name: Reload systemd configuration cache to register new backend service
+      ansible.builtin.systemd:
+        daemon_reload: true
     - name: install mysql client
       package:
         name: mysql
