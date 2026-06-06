@@ -27,7 +27,7 @@
         overwrite: true
         loop: "{{ ec2_output.results }}"
       when: 
-        - ainstance_action == "create"
+        - instance_action == "create"
         - item.item != "lb"
 
     - name: create r53 records
