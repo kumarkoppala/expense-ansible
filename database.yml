@@ -16,5 +16,18 @@
     - name: setup root user_password
       ansible.builtin.shell: |
         mysql_secure_installation --set-root-pass ExpenseApp@1
+    - name: Test MySQL authentication with the new password
+      ansible.builtin.command: >
+        mysql -u root -p'ExpenseApp@1' -e "QUIT"
+      register: mysql_auth_test
+      ignore_errors: true
+      changed_when: false
+      no_log: true
+
+    - name: Setup root user password (Run only if authentication failed)
+      ansible.builtin.shell: >
+      mysql_secure_installation --set-root-pass ExpenseApp@1
+      when: mysql_auth_test.rc != 0
+      no_log: true
     
          
