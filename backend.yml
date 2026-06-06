@@ -59,14 +59,23 @@
         name: pymysql
         state: present
 
-    - name: Check if a specific table already exists in the database
-      community.mysql.mysql_query: # Or your current mysql table validation module
+    - name: Ensure the transactions database exists
+      community.mysql.mysql_db:
         login_host: database.yokshithkumar.shop
         login_user: root
         login_password: "{{ mysql_password }}"
-        login_db: trasactions
+        name: transactions
+        state: present
+
+    - name: Check if a specific table already exists in the database
+      community.mysql.mysql_query:
+        login_host: database.yokshithkumar.shop
+        login_user: root
+        login_password: "{{ mysql_password }}"
+        login_db: transactions
         query: "SHOW TABLES LIKE 'trasactions';"
       register: table_check
+
 
 
     - name: Import schema only if database is completely empty
