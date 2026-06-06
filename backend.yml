@@ -98,3 +98,8 @@
         login_user: "{{ mysql_user }}"
         login_password: "{{ mysql_password }}"
       when: schema_check.query_result[0] | length == 0
+    - name: restart and reload backend
+      ansible.builtin.service:
+        name: backend
+        state: started
+        enabled: true
