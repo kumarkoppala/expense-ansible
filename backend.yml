@@ -67,7 +67,7 @@
         name: transactions
         state: present
 
-      - name: Check if the transaction table exists inside the transactions database
+    - name: Check if the transaction table exists inside the transactions database
       community.mysql.mysql_query:
         login_host: "{{ mysql_host }}"
         login_user: "{{ mysql_user }}"
