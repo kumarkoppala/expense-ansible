@@ -64,6 +64,7 @@
         login_host: database.yokshithkumar.shop
         login_user: root
         login_password: "{{ mysql_password }}"
+        login_db: expense
         query: "SHOW TABLES LIKE 'trasactions';"
       register: table_check
 
