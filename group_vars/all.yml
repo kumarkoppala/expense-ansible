@@ -5,3 +5,5 @@ SG: roboshop-frontend
 action: create
 mysql_password: "ExpenseApp@1"
 domain: yokshithkumar.shop
+mysql_host: database.yokshithkumar.shop
+mysql_user: root

@@ -67,33 +67,34 @@
         name: transactions
         state: present
 
-    - name: Check if a specific table already exists in the database
+      - name: Check if the transaction table exists inside the transactions database
       community.mysql.mysql_query:
-        login_host: database.yokshithkumar.shop
-        login_user: root
+        login_host: "{{ mysql_host }}"
+        login_user: "{{ mysql_user }}"
         login_password: "{{ mysql_password }}"
-        login_db: transactions
-        query: "SHOW TABLES LIKE 'trasactions';"
-      register: table_check
+        login_db: information_schema
+        query: |
+          SELECT TABLE_NAME 
+          FROM TABLES 
+          WHERE TABLE_SCHEMA = 'transactions' 
+            AND TABLE_NAME = 'transaction';
+      register: schema_check
 
+    - name: Ensure the transactions database is physically created
+      community.mysql.mysql_db:
+        login_host: "{{ mysql_host }}"
+        login_user: "{{ mysql_user }}"
+        login_password: "{{ mysql_password }}"
+        name: transactions
+        state: present
+      when: schema_check.query_result[0] | length == 0
 
-
-    - name: Import schema only if database is completely empty
+    - name: Load the data schema because database or table was missing
       community.mysql.mysql_db:
         state: import
-        name: all
-        target: /app/schema/backend.sql
-        login_host: "database.yokshithkumar.shop"
-        login_user: root
+        name: transactions
+        target: "/app/schema/backend.sql" # Ensure this path points to your SQL file
+        login_host: "{{ mysql_host }}"
+        login_user: "{{ mysql_user }}"
         login_password: "{{ mysql_password }}"
-      when: table_check.query_result[0]['COUNT(*)'] == 0
-    - name: Force systemd to pick up the new service template
-      ansible.builtin.systemd:
-        daemon_reload: yes
-    - name: start backend service
-      service:
-        name: backend
-        state: restarted
-      
-
- 
+      when: schema_check.query_result[0] | length == 0
