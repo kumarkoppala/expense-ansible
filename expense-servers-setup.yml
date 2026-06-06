@@ -4,6 +4,7 @@
   vars:
     instances: ["database", "backend", "frontend", "lb"]
     domain: "yokshithkumar.shop"
+    action: create
   tasks:
     - name: launching servers
       amazon.aws.ec2_instance:
