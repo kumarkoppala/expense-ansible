@@ -28,7 +28,6 @@
       ansible.builtin.package:
         name:
           - tar
-          - python3-pymysql # FIX 2: Required for mysql modules to work
         state: present
     - name: Download and unzip application code
       ansible.builtin.unarchive:
