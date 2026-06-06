@@ -49,19 +49,24 @@
       package:
         name: mysql
         state: present
-    - name: install python3-pymysql driver on backend host
+    - name: Ensure python3-pip is available on backend host
       ansible.builtin.package:
-        name: python3-pymysql
+        name: python3-pip
         state: present
 
-    
+    - name: Install PyMySQL driver using pip3
+      ansible.builtin.pip:
+        name: pymysql
+        state: present
+
     - name: Check if a specific table already exists in the database
-      community.mysql.mysql_query:
-        login_host: "database.yokshithkumar.shop"
+      community.mysql.mysql_query: # Or your current mysql table validation module
+        login_host: database.yokshithkumar.shop
         login_user: root
-        login_password: "{{ mysql_password }}"
-        query: "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = 'expense';"
+        login_password: "YourPassword"
+        query: "SHOW TABLES LIKE 'your_table';"
       register: table_check
+
 
     - name: Import schema only if database is completely empty
       community.mysql.mysql_db:
