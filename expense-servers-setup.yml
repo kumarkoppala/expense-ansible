@@ -74,4 +74,4 @@
         region: "us-east-1"
         state: absent
       when: instance_action == "delete"
-      loop: "{{ instances }}"
+      loop: "{{ instances }}" 
