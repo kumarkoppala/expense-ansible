@@ -63,7 +63,7 @@
       community.mysql.mysql_query: # Or your current mysql table validation module
         login_host: database.yokshithkumar.shop
         login_user: root
-        login_password: "YourPassword"
+        login_password: "{{ mysql_password }}"
         query: "SHOW TABLES LIKE 'your_table';"
       register: table_check
 
