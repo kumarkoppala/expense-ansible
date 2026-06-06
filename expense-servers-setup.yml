@@ -1,0 +1,76 @@
+- name: launching expense project infra
+  hosts: localhost
+  connection: localhost
+  vars:
+    instances: ["database", "backend", "frontend", "lb"]
+    domain: "yokshithkumar.shop"
+  tasks:
+    - name: launching servers
+      amazon.aws.ec2_instance:
+        instance_type: t3.micro
+        name: "{{ item }}"
+        image_id: "{{ AMI }}"
+        security_groups: "{{ SG }}"
+      register: ec2_output
+      loop: "{{ instances }}"
+      when: action == "create"
+    
+    - name: create r53 records
+      amazon.aws.route53:
+        state: present
+        zone: "{{ domain }}"
+        record: "{{ item.item }}.{{ domain }}" #mongodb.daws90s.shop
+        type: A
+        ttl: 1
+        value: "{{ item.instances[0].private_ip_address }}"
+        overwrite: true
+        loop: "{{ ec2_output.results }}"
+      when: 
+        - action == "create"
+        - item.item != "lb"
+
+    - name: create r53 records
+      amazon.aws.route53:
+        state: present
+        zone: "{{ domain }}"
+        record: "{{ domain }}" #mongodb.daws90s.shop
+        type: A
+        ttl: 1
+        value: "{{ item.instances[0].public_ip_address }}"
+        overwrite: true
+        loop: "{{ ec2_output.results }}"
+      when: 
+        - action == "create"
+        - item.item == "lb"
+    
+    - name: delete r53 record for all servrs except lb
+      amazon.aws.route53:
+        state: absent
+        zone: "{{ domain }}"
+        record: "{{item}}.{{ domain }}" # daws90s.shop
+        ttl: 1
+        type: A
+      loop: "{{ instances }}"  
+      when: 
+        - action == "delete"
+        - item != "lb"
+
+    - name: delete r53 record for lb
+      amazon.aws.route53:
+        state: absent
+        zone: "{{ domain }}"
+        record: "{{ domain }}" # daws90s.shop
+        ttl: 1
+        type: A
+      loop: "{{ instances }}"  
+      when: 
+        - action == "delete"
+        - item == "lb"  
+    
+    - name: Terminate EC2 instance
+      amazon.aws.ec2_instance:
+        name: "{{ item }}"
+        region: "us-east-1"
+        state: absent
+      when: action == "delete"
+      loop: "{{ instances }}"

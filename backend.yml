@@ -1,0 +1,78 @@
+- name: configuring backend server
+  hosts: backend
+  become: yes
+  tasks:
+    - name: Enable Node.js 20 DNF module stream
+      ansible.builtin.dnf:
+        name: "nodejs:20"
+        state: present
+    - name: Install nodejs
+      package:
+        name: nodejs
+        state: present
+    - name: remove app directory if already exist
+      file:
+        path: /app
+        state: absent
+    - name: create app direcotory
+      file:
+        path: /app
+        state: directory
+    - name: Create a dedicated system user for the application
+      ansible.builtin.user:
+        name: expense
+        comment: "expense system user"
+        system: yes
+        shell: /sbin/nologin
+        home: /app
+        state: present
+    - name: Ensure tar and python driver are installed
+      ansible.builtin.package:
+        name:
+          - tar
+          - python3-pymysql # FIX 2: Required for mysql modules to work
+        state: present
+    - name: Download and unzip application code
+      ansible.builtin.unarchive:
+        src: https://raw.githubusercontent.com/daws-90s/expense-documentation/refs/heads/main/artifacts/expense-backend-v3.tar.gz
+        dest: /app
+        remote_src: yes
+    - name: Install Node.js application dependencies
+      community.general.npm:
+        path: /app
+        state: present
+    - name: Copy and configure application environment file
+      ansible.builtin.template:
+        src: backend.service.j2
+        dest: /etc/systemd/system/backend.service
+    - name: install mysql client
+      package:
+        name: mysql
+        state: present
+    - name: Check if a specific table already exists in the database
+      community.mysql.mysql_query:
+        login_host: "database.yokshithkumar.shop"
+        login_user: root
+        login_password: "{{ mysql_password }}"
+        query: "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = 'expense';"
+      register: table_check
+
+    - name: Import schema only if database is completely empty
+      community.mysql.mysql_db:
+        state: import
+        name: all
+        target: /app/schema/backend.sql
+        login_host: "database.yokshithkumar.shop"
+        login_user: root
+        login_password: "{{ mysql_password }}"
+      when: table_check.query_result[0]['COUNT(*)'] == 0
+    - name: Force systemd to pick up the new service template
+      ansible.builtin.systemd:
+        daemon_reload: yes
+    - name: start backend service
+      service:
+        name: backend
+        state: restarted
+      
+
+ 

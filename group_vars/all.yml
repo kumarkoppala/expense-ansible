@@ -1,0 +1,6 @@
+user_name: ec2-user
+user_password: DevOps321
+AMI: ami-0220d79f3f480ecf5
+SG: roboshop-frontend
+action: create
+mysql_password: "ExpenseApp@1"

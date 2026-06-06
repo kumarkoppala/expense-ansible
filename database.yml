@@ -1,0 +1,39 @@
+- name: configuring database servers
+  hosts: database
+  tasks:
+    - name: installing mysql package
+      package:
+        name: mysql-server
+        state: present
+    - name: enable and start the mysql
+      service:
+        name: mysqld
+        state: started
+        enabled: yes
+        - name: install python3-pymysql driver
+      package:
+        name: python3-pymysql
+        state: present
+
+    - name: Extract temporary MySQL password
+      ansible.builtin.shell: grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}'
+      register: temp_password_output
+      changed_when: false
+
+    - name: Update MySQL root password
+      ansible.mysql.mysql_user:
+        # What you want to set
+        name: root
+        password: "{{ mysql_root_password }}"
+        host: "{{ item }}"
+        # How to authenticate right now
+        login_user: root
+        login_password: "{{ temp_password_output.stdout }}"
+        state: present
+      loop:
+        - localhost
+        - 127.0.0.1
+        - ::1
+      ignore_errors: yes # Essential so subsequent runs do not fail once password
+    
+         
