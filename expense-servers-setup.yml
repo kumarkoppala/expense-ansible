@@ -28,7 +28,7 @@
         loop: "{{ ec2_output.results }}"
       when: 
         - instance_action == "create"
-        - item.item != "lb"
+        - item.tags.Name != "lb"
 
     - name: create r53 records
       amazon.aws.route53:
@@ -42,7 +42,7 @@
         loop: "{{ ec2_output.results }}"
       when: 
         - instance_action == "create"
-        - item.item == "lb"
+        - item.tags.Name == "lb"
     
     - name: delete r53 record for all servrs except lb
       amazon.aws.route53:
